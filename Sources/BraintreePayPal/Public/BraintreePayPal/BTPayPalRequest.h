@@ -126,6 +126,11 @@ typedef NS_ENUM(NSInteger, BTPayPalRequestLandingPageType) {
  */
 - (NSDictionary<NSString *, NSObject *> *)parametersWithConfiguration:(BTConfiguration *)configuration;
 
+/**
+ Optional: A risk correlation ID created with Set Transaction Context on your server.
+*/
+@property (nonatomic, nullable, copy) NSString *riskCorrelationId;
+
 @end
 
 NS_ASSUME_NONNULL_END

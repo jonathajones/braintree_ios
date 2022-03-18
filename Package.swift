@@ -25,23 +25,19 @@ let package = Package(
         ),
         .library(
             name: "BraintreeDataCollector",
-            targets: ["BraintreeDataCollector"]
+            targets: ["BraintreeDataCollector", "KountDataCollector"]
         ),
         .library(
             name: "BraintreePaymentFlow",
-            targets: ["BraintreePaymentFlow"]
+            targets: ["BraintreePaymentFlow", "PPRiskMagnes"]
         ),
         .library(
             name: "BraintreePayPal",
-            targets: ["BraintreePayPal"]
+            targets: ["BraintreePayPal", "PPRiskMagnes"]
         ),
         .library(
             name: "BraintreeThreeDSecure",
-            targets: ["BraintreeThreeDSecure"]
-        ),
-        .library(
-            name: "CardinalMobile",
-            targets: ["CardinalMobile"]
+            targets: ["BraintreeThreeDSecure", "CardinalMobile", "PPRiskMagnes"]
         ),
         .library(
             name: "BraintreeUnionPay",
@@ -52,16 +48,8 @@ let package = Package(
             targets: ["BraintreeVenmo"]
         ),
         .library(
-            name: "KountDataCollector",
-            targets: ["KountDataCollector"]
-        ),
-        .library(
             name: "PayPalDataCollector",
-            targets: ["PayPalDataCollector"]
-        ),
-        .library(
-            name: "PPRiskMagnes",
-            targets: ["PPRiskMagnes"]
+            targets: ["PayPalDataCollector", "PPRiskMagnes"]
         )
     ],
     dependencies: [
@@ -73,19 +61,16 @@ let package = Package(
         .target(
             name: "BraintreeAmericanExpress",
             dependencies: ["BraintreeCore"],
-            exclude: ["Info.plist"],
             publicHeadersPath: "Public"
         ),
         .target(
             name: "BraintreeApplePay",
             dependencies: ["BraintreeCore"],
-            exclude: ["Info.plist"],
             publicHeadersPath: "Public"
         ),
         .target(
             name: "BraintreeCard",
             dependencies: ["BraintreeCore"],
-            exclude: ["Info.plist"],
             publicHeadersPath: "Public"
         ),
         .target(
@@ -95,57 +80,52 @@ let package = Package(
         ),
         .target(
             name: "BraintreeDataCollector",
-            dependencies: ["BraintreeCore"],
+            dependencies: ["BraintreeCore", "KountDataCollector"],
             exclude: ["Kount"],
             publicHeadersPath: "Public"
         ),
         .target(
             name: "BraintreePaymentFlow",
             dependencies: ["BraintreeCore", "PayPalDataCollector"],
-            exclude: ["Info.plist"],
             publicHeadersPath: "Public"
         ),
         .target(
             name: "BraintreePayPal",
             dependencies: ["BraintreeCore", "PayPalDataCollector"],
-            exclude: ["Info.plist"],
             publicHeadersPath: "Public"
         ),
         .target(
             name: "BraintreeThreeDSecure",
-            dependencies: ["BraintreePaymentFlow", "BraintreeCard"],
-            exclude: ["Info.plist"],
+            dependencies: ["BraintreePaymentFlow", "BraintreeCard", "CardinalMobile", "PPRiskMagnes"],
             publicHeadersPath: "Public",
             cSettings: [.headerSearchPath("V2UICustomization")]
         ),
         .binaryTarget(
             name: "CardinalMobile",
-            path: "Frameworks/CardinalMobile.xcframework"
+            path: "Frameworks/XCFrameworks/CardinalMobile.xcframework"
         ),
         .target(
             name: "BraintreeUnionPay",
             dependencies: ["BraintreeCard"],
-            exclude: ["Info.plist"],
             publicHeadersPath: "Public"
         ),
         .target(
             name: "BraintreeVenmo",
             dependencies: ["BraintreeCore"],
-            exclude: ["Info.plist"],
             publicHeadersPath: "Public"
         ),
         .binaryTarget(
             name: "KountDataCollector",
-            path: "Frameworks/KountDataCollector.xcframework"
+            path: "Frameworks/XCFrameworks/KountDataCollector.xcframework"
         ),
         .target(
             name: "PayPalDataCollector",
-            dependencies: ["BraintreeCore"],
+            dependencies: ["BraintreeCore", "PPRiskMagnes"],
             path: "Sources/PayPalDataCollector"
         ),
         .binaryTarget(
             name: "PPRiskMagnes",
-            path: "Frameworks/PPRiskMagnes.xcframework"
+            path: "Frameworks/XCFrameworks/PPRiskMagnes.xcframework"
         )
     ]
 )

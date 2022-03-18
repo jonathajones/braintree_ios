@@ -21,6 +21,9 @@
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Settings", nil) style:UIBarButtonItemStylePlain target:self action: @selector(tappedSettings)];
     self.view.backgroundColor = [UIColor whiteColor];
     [self.navigationController setToolbarHidden:NO];
+    if (@available(iOS 15.0, *)) {
+        self.navigationController.navigationBar.scrollEdgeAppearance = self.navigationController.navigationBar.standardAppearance;
+    }
     [self setupToolbar];
     [self reloadIntegration];
 }
@@ -45,6 +48,10 @@
     self.statusItem = [[UIBarButtonItem alloc] initWithCustomView:button];
     self.statusItem.enabled = NO;
     self.toolbarItems = @[flexSpaceLeft, self.statusItem, flexSpaceRight];
+    
+    if (@available(iOS 15.0, *)) {
+        self.navigationController.toolbar.scrollEdgeAppearance = self.navigationController.toolbar.standardAppearance;
+    }
 }
 
 #pragma mark - UI Updates
@@ -59,6 +66,7 @@
 
 - (void)updateStatus:(NSString *)status {
     [(UIButton *)self.statusItem.customView setTitle:NSLocalizedString(status, nil) forState:UIControlStateNormal];
+    [(UIButton *)self.statusItem.customView setTitleColor:UIColor.blackColor forState:UIControlStateNormal];
     NSLog(@"%@", ((UIButton *)self.statusItem.customView).titleLabel.text);
 }
 
@@ -71,13 +79,11 @@
     if (self.latestTokenizedPayment) {
         NSString *nonce = self.latestTokenizedPayment.nonce;
         [self updateStatus:@"Creating Transaction…"];
-        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
         NSString *merchantAccountID = ([self.latestTokenizedPayment.type isEqualToString:@"UnionPay"]) ? @"fake_switch_usd" : nil;
         
         [BraintreeDemoMerchantAPIClient.shared makeTransactionWithPaymentMethodNonce:nonce
                                                                    merchantAccountID:merchantAccountID
                                                                           completion:^(NSString *transactionID, NSError *error) {
-            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
             self.latestTokenizedPayment = nil;
             if (error) {
                 [self updateStatus:error.localizedDescription];
@@ -139,30 +145,10 @@
             self.currentDemoViewController = [self instantiateCurrentIntegrationViewControllerWithAuthorization:tokenizationKey];
             return;
         }
-        case BraintreeDemoAuthTypePayPalIDToken: {
-            [self updateStatus:@"Fetching PayPal ID Token…"];
-
-            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-
-            [BraintreeDemoMerchantAPIClient.shared fetchPayPalIDTokenWithCompletion:^(NSString * _Nullable idToken, NSError * _Nullable err) {
-                [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-                if (err) {
-                    [self updateStatus:err.localizedDescription];
-                } else {
-                    [self updateStatus:@"Using PayPal ID Token"];
-                    self.currentDemoViewController = [self instantiateCurrentIntegrationViewControllerWithAuthorization:idToken];
-                }
-            }];
-
-            break;
-        }
         case BraintreeDemoAuthTypeClientToken: {
             [self updateStatus:@"Fetching Client Token…"];
 
-            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-
             [BraintreeDemoMerchantAPIClient.shared createCustomerAndFetchClientTokenWithCompletion:^(NSString *clientToken, NSError *error) {
-                [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
                 if (error) {
                     [self updateStatus:error.localizedDescription];
                 } else {

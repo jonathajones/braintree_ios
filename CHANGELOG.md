@@ -1,5 +1,64 @@
 # Braintree iOS SDK Release Notes
 
+## 5.7.0 (2022-03-02)
+* Fix configuration caching
+
+## 5.6.3 (2022-02-09)
+* Swift Package Manager
+  * Add explicit package dependancies for `BraintreeDataCollector`, `BraintreeThreeDSecure`, and `PayPalDataCollector` (fixes #735)
+
+## 5.6.2 (2022-02-01)
+* Update import statement of header file from `kDataCollector` to `KDataCollector`
+
+## 5.6.1 (2022-01-14)
+* Fix error construction for duplicate card error
+
+## 5.6.0 (2022-01-13)
+* Card Tokenization
+  * Remove expiration date duplication in card tokenization (fixes #772)
+  * Add `BTCardClientErrorTypeCardAlreadyExists` to `BTCardClientErrorType` 
+* 3DS
+  * Add nil checks for 3DS handlers (fixes #769)
+
+## 5.5.0 (2021-11-01)
+* Add `displayName` to `BTLocalPaymentRequest`
+* Add `riskCorrelationId` to `BTPayPalRequest`
+* Update `CardinalMobile` frameworks
+  * Update `CardinalMobile.xcframework` to 2.2.5-2
+    * Adds `arm64` simulator / Apple Silicon support (discussed in #564)
+    * Fixes 3DS (iOS 15 translucent toolbar issue)[#748]
+  * Update `CardinalMobile.framework` to 2.2.5-1
+  * _Note:_
+      * This release allows all SPM, CocoaPods, and Carthage users using `--use-xcframeworks` to get **Apple Silicon support** and the iOS 15 3DS toolbar fix.
+      * Carthage users not using `--use-xcframeworks` will not get these updates until a later version.
+      * See PR #750 for more details.
+
+## 5.4.4 (2021-10-05)
+* Re-organize `/Frameworks` binaries into nested `/FatFrameworks` and `/XCFrameworks` directories.
+  * Provides fix for this [CocoaPods issue](https://github.com/CocoaPods/CocoaPods/issues/10731) & allows proper usage of `PPRiskMagnes.xcframework` by `PayPalDataCollector` subspec.
+* Swift Package Manager
+  * Update Package.swift to include `PPRiskMagnes` as explicit target for library products that require `PayPalDataCollector`
+  * _Note:_ No longer requires manual inclusion of `PayPalDataCollector` in order to use `BraintreeThreeDSecure`, `BraintreePayPal`, and `BraintreePaymentFlow`
+
+## 4.38.0 (2021-08-24)
+* Add `offerPayLater` to `BTPayPalRequest`
+
+## 5.4.3 (2021-07-22)
+* Swift Package Manager
+  * Adds `NS_EXTENSION_UNAVAILABLE` annotations to methods unavailable for use in app extensions. Fixes (Drop-In issue #343)[https://github.com/braintree/braintree-ios-drop-in/issues/343] for Xcode 13-beta3.
+* ThreeDSecure
+  * Add `cardAddChallenge` to `BTThreeDSecureRequest`
+
+## 5.4.2 (2021-06-24)
+* Swift Package Manager
+  * Remove product libraries for `KountDataCollector`, `PPRiskMagnes`, and `CardinalMobile` (requires Xcode 12.5+)
+    * _Notes:_
+      * This was a workaround for an Xcode bug discussed in #576. The bug resolved in Xcode 12.5.
+      * You can remove the `KountDataCollector`, `PPRiskMagnes`, and `CardinalMobile` explicit dependencies.
+      * You can also remove any run-script phase or post-action [previously required](/SWIFT_PACKAGE_MANAGER.md) for using these frameworks.
+  * Xcode 13 Beta
+    * Remove invalid file path exclusions from `Package.swift` (thanks @JonathanDowning)
+
 ## 5.4.1 (2021-06-22)
 * Re-add `BraintreeCore` dependency to `PayPalDataCollector` for Swift Package Manager archive issue workaround (fixes #679)
 
@@ -746,7 +805,7 @@ As always, feel free to [open an Issue](https://github.com/braintree/braintree_i
 * Fix bug in Demo app
   * Menu button now works correctly
 * Fix bug with PayPal app switching
-  * The bug occurred when installing a new app after the Braintree SDK had been initialized. When attempting to authorize with PayPal in this scenario, the SDK would switch to the `wallet` and launch the `in-app` authorization. 
+  * The bug occurred when installing a new app after the Braintree SDK had been initialized. When attempting to authorize with PayPal in this scenario, the SDK would switch to the `wallet` and launch the `in-app` authorization.
 
 ## 3.8.1 (2015-05-22)
 
@@ -837,11 +896,11 @@ As always, feel free to [open an Issue](https://github.com/braintree/braintree_i
 * Update PayPal Mobile SDK to new version (PayPal-iOS-SDK 2.8.4-bt1) that does not include card.io.
   * :rotating_light: Please note! :rotating_light:  
 
-      This change breaks builds that depend on a workaround introduced in 3.4.0 that added card.io headers to fix [card.io duplicate symbol issues](https://github.com/braintree/braintree_ios/issues/53). 
+      This change breaks builds that depend on a workaround introduced in 3.4.0 that added card.io headers to fix [card.io duplicate symbol issues](https://github.com/braintree/braintree_ios/issues/53).
 
-      Since card.io is not officially part of the Braintree API, and since the headers were only included as part of a workaround for use by a small group of developers, this potentially-breaking change is not accompanied by a major version release. 
+      Since card.io is not officially part of the Braintree API, and since the headers were only included as part of a workaround for use by a small group of developers, this potentially-breaking change is not accompanied by a major version release.
 
-      If your build breaks due to this change, you can re-add card.io to your project's Podfile: 
+      If your build breaks due to this change, you can re-add card.io to your project's Podfile:
 
           pod 'CardIO', '~> 4.0'
 
@@ -897,7 +956,7 @@ As always, feel free to [open an Issue](https://github.com/braintree/braintree_i
 
 * Upgrade PayPal Mobile SDK to version 2.7.1
   * Fixes symbol conflicts with 1Password
-  * Upgrades embedded card.io library to version 3.10.1 
+  * Upgrades embedded card.io library to version 3.10.1
 
 ## 3.4.1 (2014-11-05)
 
@@ -967,7 +1026,7 @@ As always, feel free to [open an Issue](https://github.com/braintree/braintree_i
   * Test improvements
   * Internal API tweaks
   * Update PayPal implementation to always support PayPal display email/phone across client and server
-    * Your PayPal app (client ID) must now have the email scope capability. This is default for Braintree-provisioned PayPal apps. 
+    * Your PayPal app (client ID) must now have the email scope capability. This is default for Braintree-provisioned PayPal apps.
   * Improved Braintree-Demo app that demonstrates many integration styles
   * Upgraded underlying PayPal Mobile SDK
 

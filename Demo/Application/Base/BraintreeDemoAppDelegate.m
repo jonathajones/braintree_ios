@@ -44,7 +44,8 @@ NSString *BraintreeDemoAppDelegatePaymentsURLScheme = @"com.braintreepayments.De
     UIColor *pleasantGray = [UIColor colorWithWhite:42/255.0f alpha:1.0f];
 
     [[UIToolbar appearance] setBarTintColor:pleasantGray];
-    [[UIToolbar appearance] setBarStyle:UIBarStyleBlackTranslucent];
+    [[UIToolbar appearance] setBarStyle:UIBarStyleBlack];
+    [[UIToolbar appearance] setTranslucent:YES];
 }
 
 - (void)registerDefaultsFromSettings {
@@ -59,8 +60,6 @@ NSString *BraintreeDemoAppDelegatePaymentsURLScheme = @"com.braintreepayments.De
         [[NSUserDefaults standardUserDefaults] setInteger:BraintreeDemoAuthTypeClientToken forKey:BraintreeDemoSettings.AuthorizationTypeDefaultsKey];
     }else if ([[[NSProcessInfo processInfo] arguments] containsObject:@"-TokenizationKey"]) {
         [[NSUserDefaults standardUserDefaults] setInteger:BraintreeDemoAuthTypeTokenizationKey forKey:BraintreeDemoSettings.AuthorizationTypeDefaultsKey];
-    }else if ([[[NSProcessInfo processInfo] arguments] containsObject:@"-PayPalIDToken"]) {
-        [[NSUserDefaults standardUserDefaults] setInteger:BraintreeDemoAuthTypePayPalIDToken forKey:BraintreeDemoSettings.AuthorizationTypeDefaultsKey];
     }
     
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"BraintreeDemoSettingsAuthorizationOverride"];

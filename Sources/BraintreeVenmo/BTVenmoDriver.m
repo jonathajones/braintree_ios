@@ -51,7 +51,7 @@ static BTVenmoDriver *appSwitchedDriver;
 
 - (instancetype)initWithAPIClient:(BTAPIClient *)apiClient {
     if (self = [super init]) {
-        _apiClient = [apiClient copyWithSource:BTClientMetadataSourceVenmoApp integration:apiClient.metadata.integration];
+        _apiClient = apiClient;
     }
     return self;
 }
@@ -62,7 +62,7 @@ static BTVenmoDriver *appSwitchedDriver;
 
 #pragma mark - Accessors
 
-- (id)application {
+- (id)application NS_EXTENSION_UNAVAILABLE("Uses APIs (i.e UIApplication.sharedApplication) not available for use in App Extensions.") {
     if (!_application) {
         _application = [UIApplication sharedApplication];
     }
@@ -182,6 +182,7 @@ static BTVenmoDriver *appSwitchedDriver;
                                                                                 environment:configuration.venmoEnvironment
                                                                            paymentContextID:paymentContextID
                                                                                    metadata:self.apiClient.metadata];
+
                 [self performAppSwitch:appSwitchURL shouldVault:venmoRequest.vault completion:completionBlock];
             }];
         } else {
@@ -273,7 +274,7 @@ static BTVenmoDriver *appSwitchedDriver;
     switch (returnURL.state) {
         case BTVenmoAppSwitchReturnURLStateSucceededWithPaymentContext: {
             NSDictionary *params = @{
-                @"query": @"query PaymentContext($id: ID!) { node(id: $id) { ... on VenmoPaymentContext { paymentMethodId userName } } }",
+                @"query": @"query PaymentContext($id: ID!) { node(id: $id) { ... on VenmoPaymentContext { paymentMethodId userName payerInfo { firstName lastName phoneNumber email externalId userName } } } }",
                 @"variables": @{ @"id": returnURL.paymentContextID }
             };
 

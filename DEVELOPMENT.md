@@ -12,6 +12,8 @@ There are a number of test targets for each section of the project.
 
 It's a good idea to run `rake`, which runs all unit tests, before committing.
 
+Running the tests requires Xcode 13+.
+
 Use the following commands to run tests:
 * UI tests: `bundle && rake spec:ui`
 * Unit tests: `bundle && rake spec:unit`
@@ -74,3 +76,7 @@ To import a Braintree framework written in **Swift** into an Objective-C file, u
 #import <PayPalDataCollector/PayPalDataCollector-Swift.h>
 #endif
 ```
+
+## Releasing
+
+Refer to the `ios/releases` section in the SDK Knowledge Repo.

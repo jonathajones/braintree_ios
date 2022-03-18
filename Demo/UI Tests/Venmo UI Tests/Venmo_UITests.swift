@@ -18,39 +18,35 @@ class Venmo_UITests: XCTestCase {
         demoApp.launchArguments.append("-Integration:BraintreeDemoCustomVenmoButtonViewController")
         demoApp.launch()
 
-        waitForElementToAppear(demoApp.buttons["Venmo (custom button)"])
-    }
-
-    func testTokenizeVenmo_whenSignInSuccessful_returnsNonce() {
+        waitForElementToBeHittable(demoApp.buttons["Venmo (custom button)"])
         demoApp.buttons["Venmo (custom button)"].tap()
+    }
+    
+    func testTokenizeVenmo_whenSignInSuccessfulWithPaymentContext_returnsNonce() {
+        waitForElementToBeHittable(mockVenmo.buttons["SUCCESS WITH PAYMENT CONTEXT"])
+        mockVenmo.buttons["SUCCESS WITH PAYMENT CONTEXT"].tap()
 
-        waitForElementToAppear(mockVenmo.buttons["SUCCESS"])
-        mockVenmo.buttons["SUCCESS"].tap()
+        XCTAssertTrue(demoApp.buttons["Got a nonce. Tap to make a transaction."].waitForExistence(timeout: 15))
+    }
+    
+    func testTokenizeVenmo_whenSignInSuccessfulWithoutPaymentContext_returnsNonce() {
+        waitForElementToBeHittable(mockVenmo.buttons["SUCCESS WITHOUT PAYMENT CONTEXT"])
+        mockVenmo.buttons["SUCCESS WITHOUT PAYMENT CONTEXT"].tap()
 
-        waitForElementToAppear(demoApp.buttons["Got a nonce. Tap to make a transaction."])
-        XCTAssertTrue(demoApp.buttons["Got a nonce. Tap to make a transaction."].exists);
+        XCTAssertTrue(demoApp.buttons["Got a nonce. Tap to make a transaction."].waitForExistence(timeout: 15))
     }
 
     func testTokenizeVenmo_whenErrorOccurs_returnsError() {
-        demoApp.buttons["Venmo (custom button)"].tap()
-
-        waitForElementToAppear(mockVenmo.buttons["ERROR"])
+        waitForElementToBeHittable(mockVenmo.buttons["ERROR"])
         mockVenmo.buttons["ERROR"].tap()
 
-        // Add check for Settings button to debug error message not being found in CI
-        waitForElementToAppear(demoApp.buttons["Settings"])
-
-        waitForElementToAppear(demoApp.buttons["An error occurred during the Venmo flow"])
-        XCTAssertTrue(demoApp.buttons["An error occurred during the Venmo flow"].exists);
+        XCTAssertTrue(demoApp.buttons["An error occurred during the Venmo flow"].waitForExistence(timeout: 15))
     }
 
     func testTokenizeVenmo_whenUserCancels_returnsCancel() {
-        demoApp.buttons["Venmo (custom button)"].tap()
-
-        waitForElementToAppear(mockVenmo.buttons["Cancel"])
+        waitForElementToBeHittable(mockVenmo.buttons["Cancel"])
         mockVenmo.buttons["Cancel"].tap()
 
-        waitForElementToAppear(demoApp.buttons["Canceled 🔰"])
-        XCTAssertTrue(demoApp.buttons["Canceled 🔰"].exists);
+        XCTAssertTrue(demoApp.buttons["Canceled 🔰"].waitForExistence(timeout: 15))
     }
 }

@@ -84,7 +84,7 @@ NSString * _Nonnull const PayPalEnvironmentMock = @"mock";
 
 - (instancetype)initWithAPIClient:(BTAPIClient *)apiClient {
     if (self = [super init]) {
-        _apiClient = [apiClient copyWithSource:BTClientMetadataSourcePayPalBrowser integration:apiClient.metadata.integration];
+        _apiClient = apiClient;
         [NSNotificationCenter.defaultCenter addObserver:self
                                                selector:@selector(applicationDidBecomeActive:)
                                                    name:UIApplicationDidBecomeActiveNotification
@@ -187,7 +187,7 @@ NSString * _Nonnull const PayPalEnvironmentMock = @"mock";
 
             NSString *pairingID = [self.class tokenFromApprovalURL:approvalUrl];
 
-            self.clientMetadataID = [PPDataCollector clientMetadataID:pairingID];
+            self.clientMetadataID = self.payPalRequest.riskCorrelationId ? self.payPalRequest.riskCorrelationId : [PPDataCollector clientMetadataID:pairingID];
 
             BOOL analyticsSuccess = error ? NO : YES;
 
@@ -419,7 +419,7 @@ NSString * _Nonnull const PayPalEnvironmentMock = @"mock";
 
 #pragma mark - ASWebAuthenticationPresentationContextProviding protocol
 
-- (ASPresentationAnchor)presentationAnchorForWebAuthenticationSession:(ASWebAuthenticationSession *)session API_AVAILABLE(ios(13)) {
+- (ASPresentationAnchor)presentationAnchorForWebAuthenticationSession:(ASWebAuthenticationSession *)session API_AVAILABLE(ios(13)) NS_EXTENSION_UNAVAILABLE("Uses APIs (i.e UIApplication.sharedApplication) not available for use in App Extensions.") {
     if (self.payPalRequest.activeWindow) {
         return self.payPalRequest.activeWindow;
     }

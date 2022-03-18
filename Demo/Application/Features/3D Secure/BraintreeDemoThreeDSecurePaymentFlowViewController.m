@@ -1,12 +1,14 @@
 #import "BraintreeDemoThreeDSecurePaymentFlowViewController.h"
-#import "BraintreeUI.h"
+#import "Demo-Swift.h"
 @import BraintreeThreeDSecure;
 
 @interface BraintreeDemoThreeDSecurePaymentFlowViewController () <BTViewControllerPresentingDelegate, BTThreeDSecureRequestDelegate>
 
 @property (nonatomic, strong) BTPaymentFlowDriver *paymentFlowDriver;
-@property (nonatomic, strong) BTUICardFormView *cardFormView;
 @property (nonatomic, strong) UILabel *callbackCountLabel;
+@property (nonatomic, strong) BTCardFormView *cardFormView;
+@property (nonatomic, strong) UIButton *autofillButton3DS1;
+@property (nonatomic, strong) UIButton *autofillButton3DS2;
 @property (nonatomic) int callbackCount;
 
 @end
@@ -17,15 +19,36 @@
     [super viewDidLoad];
     self.title = NSLocalizedString(@"3D Secure - Payment Flow", nil);
 
-    self.cardFormView = [[BTUICardFormView alloc] init];
-    self.cardFormView.translatesAutoresizingMaskIntoConstraints = NO;
-    self.cardFormView.optionalFields = BTUICardFormOptionalFieldsCvv | BTUICardFormFieldPostalCode;
+    self.cardFormView = [[BTCardFormView alloc] initWithFrame:CGRectZero];
     [self.view addSubview:self.cardFormView];
+    self.cardFormView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.cardFormView.hidePhoneNumberField = YES;
+    
+    self.autofillButton3DS1 = [UIButton buttonWithType:UIButtonTypeSystem];
+    self.autofillButton3DS1.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.autofillButton3DS1 setTitle:NSLocalizedString(@"Autofill 3DS v1 Card", nil) forState:UIControlStateNormal];
+    [self.autofillButton3DS1 addTarget:self action:@selector(tappedToAutofill3DS1Card) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:self.autofillButton3DS1];
+    
+    self.autofillButton3DS2 = [UIButton buttonWithType:UIButtonTypeSystem];
+    self.autofillButton3DS2.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.autofillButton3DS2 setTitle:NSLocalizedString(@"Autofill 3DS v2 Card", nil) forState:UIControlStateNormal];
+    [self.autofillButton3DS2 addTarget:self action:@selector(tappedToAutofill3DS2Card) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:self.autofillButton3DS2];
 
     [NSLayoutConstraint activateConstraints:@[
         [self.cardFormView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
         [self.cardFormView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
-        [self.cardFormView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor]
+        [self.cardFormView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
+        [self.cardFormView.heightAnchor constraintEqualToConstant:200],
+        
+        [self.autofillButton3DS1.topAnchor constraintEqualToAnchor:self.cardFormView.bottomAnchor constant:10],
+        [self.autofillButton3DS1.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:10],
+        [self.autofillButton3DS1.heightAnchor constraintEqualToConstant:30],
+        
+        [self.autofillButton3DS2.topAnchor constraintEqualToAnchor:self.autofillButton3DS1.bottomAnchor constant:10],
+        [self.autofillButton3DS2.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:10],
+        [self.autofillButton3DS2.heightAnchor constraintEqualToConstant:30]
     ]];
 }
 
@@ -46,6 +69,8 @@
     [threeDSecureButtonsContainer addSubview:self.callbackCountLabel];
     self.callbackCount = 0;
     [self updateCallbackCount];
+    
+    self.centerYConstant = 100;
 
     [NSLayoutConstraint activateConstraints:@[
         [verifyNewCardButton.topAnchor constraintEqualToAnchor:threeDSecureButtonsContainer.topAnchor],
@@ -61,20 +86,22 @@
 
 - (BTCard *)newCard {
     BTCard *card = [BTCard new];
-    if (self.cardFormView.valid &&
-        self.cardFormView.number &&
-        self.cardFormView.expirationMonth &&
-        self.cardFormView.expirationYear) {
-        card.number = self.cardFormView.number;
-        card.expirationMonth = self.cardFormView.expirationMonth;
-        card.expirationYear = self.cardFormView.expirationYear;
-    } else {
-        [self.cardFormView showTopLevelError:@"Not valid. Using default 3DS test card..."];
-        card.number = @"4000000000001091";
-        card.expirationMonth = @"01";
-        card.expirationYear = @"2022";
-        card.cvv = @"123";
+    if (self.cardFormView.cardNumber != nil) {
+        card.number = self.cardFormView.cardNumber;
     }
+    if (self.cardFormView.expirationYear != nil) {
+        card.expirationYear = self.cardFormView.expirationYear;
+    }
+    if (self.cardFormView.expirationMonth != nil) {
+        card.expirationMonth = self.cardFormView.expirationMonth;
+    }
+    if (self.cardFormView.cvv != nil) {
+        card.cvv = self.cardFormView.cvv;
+    }
+    if (self.cardFormView.postalCode != nil) {
+        card.postalCode = self.cardFormView.postalCode;
+    }
+
     return card;
 }
 
@@ -82,25 +109,50 @@
     self.callbackCountLabel.text = [NSString stringWithFormat:@"Callback Count: %i", self.callbackCount];
 }
 
+-(void)tappedToAutofill3DS1Card {
+    self.cardFormView.cardNumberTextField.text = @"4000000000000002";
+    self.cardFormView.expirationTextField.text = self.generateFutureDate;
+    self.cardFormView.cvvTextField.text = @"123";
+    self.cardFormView.postalCodeTextField.text = @"12345";
+}
+
+-(void)tappedToAutofill3DS2Card {
+    self.cardFormView.cardNumberTextField.text = @"4000000000001091";
+    self.cardFormView.expirationTextField.text = self.generateFutureDate;
+    self.cardFormView.cvvTextField.text = @"123";
+    self.cardFormView.postalCodeTextField.text = @"12345";
+}
+
+-(NSString *)generateFutureDate {
+    NSString *monthString = @"12";
+
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"yy"];
+
+    NSDate *futureYear = [[NSCalendar currentCalendar]dateByAddingUnit:NSCalendarUnitYear value:3 toDate:[NSDate date] options:0];
+    NSString *yearString = [dateFormatter stringFromDate:futureYear];
+    NSString *futureDateString = [NSString stringWithFormat:@"%@/%@", monthString, yearString];
+
+    return futureDateString;
+}
+
 /// "Tokenize and Verify New Card"
 - (void)tappedToVerifyNewCard {
     self.callbackCount = 0;
     [self updateCallbackCount];
-    
+
     BTCard *card = [self newCard];
-    
-    self.progressBlock([NSString stringWithFormat:@"Tokenizing card ending in %@", [card.number substringFromIndex:(card.number.length - 4)]]);
-    
+
     BTCardClient *client = [[BTCardClient alloc] initWithAPIClient:self.apiClient];
     [client tokenizeCard:card completion:^(BTCardNonce * _Nullable tokenizedCard, NSError * _Nullable error) {
-        
+
         if (error) {
             self.progressBlock(error.localizedDescription);
             return;
         }
-        
+
         self.progressBlock(@"Tokenized card, now verifying with 3DS");
-        
+
         self.paymentFlowDriver = [[BTPaymentFlowDriver alloc] initWithAPIClient:self.apiClient];
         self.paymentFlowDriver.viewControllerPresentingDelegate = self;
 
@@ -140,7 +192,7 @@
         v1UICustomization.redirectButtonText = @"Return to Demo App";
         v1UICustomization.redirectDescription = @"Please use the button above if you are not automatically redirected to the app.";
         request.v1UICustomization = v1UICustomization;
-        
+
         [self.paymentFlowDriver startPaymentFlow:request completion:^(BTPaymentFlowResult * _Nonnull result, NSError * _Nonnull error) {
             self.callbackCount++;
             [self updateCallbackCount];
@@ -153,7 +205,7 @@
             } else if (result) {
                 BTThreeDSecureResult *threeDSecureResult = (BTThreeDSecureResult *)result;
                 self.completionBlock(threeDSecureResult.tokenizedCard);
-                
+
                 if (threeDSecureResult.tokenizedCard.threeDSecureInfo.liabilityShiftPossible && threeDSecureResult.tokenizedCard.threeDSecureInfo.liabilityShifted) {
                     self.progressBlock(@"Liability shift possible and liability shifted");
                 } else {
